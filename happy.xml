@@ -1,0 +1,9 @@
+<library path="happy">
+  <class name="happy/HappySystemHardware"
+         type="happy::HappySystemHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      TODO: WIN!
+    </description>
+  </class>
+</library>

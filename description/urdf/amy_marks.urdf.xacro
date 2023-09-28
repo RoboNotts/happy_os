@@ -1,0 +1,390 @@
+<?xml version="1.0"?>
+ 
+<robot name="happy" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find happy)/urdf/sick_tim_ms.urdf.xacro" />
+  <xacro:include filename="$(find happy)/ros2_control/happy.ros2_control.xacro" />
+
+  <!--All units in m-kg-s-radians unit system -->
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:property name="PI_2" value="1.5707963267949" />
+  <xacro:property name="DEG_TO_RAD" value="0.017453293" />
+  <xacro:macro name="box_inertia" params="m x y z">
+  <inertia  ixx="${m*(y*y+z*z)/12}" ixy = "0" ixz = "0"
+            iyy="${m*(x*x+z*z)/12}" iyz = "0"
+            izz="${m*(x*x+z*z)/12}" /> 
+  </xacro:macro>
+
+  <xacro:happy_ros2_control
+    name="Happy"/>
+
+  <xacro:sick_tim551 name="sick" ros_topic="scan" parent="base_link">
+    <!--<origin xyz="0.2325 0 0. 085" rpy="0 0 1.570796"/>  -->
+  </xacro:sick_tim551>
+
+  <link name="dummy">
+  </link>
+
+  <joint name="dummy_joint" type="fixed">
+    <parent link="dummy"/>
+    <child link="base_link"/>
+  </joint>
+
+  <link name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.00037739 9.43599999999975E-06 -0.0041693"
+        rpy="0 0 0" />
+      <mass
+        value="28.432" />
+      <inertia
+        ixx="0.437287155258884"
+        ixy="-0.00145172073534989"
+        ixz="-0.000105673050460986"
+        iyy="0.422130402732331"
+        iyz="0.000267145093272494"
+        izz="0.787600939452284" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="file://$(find happy)/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.52941 0.54902 0.54902 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="file://$(find happy)/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="lwheel">
+    <inertial>
+      <origin
+        xyz="0 7.9284E-18 -8.91168450782267E-34"
+        rpy="0 0 0" />
+      <mass
+        value="1.2679" />
+      <inertia
+        ixx="0.00842918283944972"
+        ixy="5.63107503334659E-20"
+        ixz="1.47045705506577E-36"
+        iyy="0.00445408378312787"
+        iyz="-9.62964972193618E-35"
+        izz="0.00445408378312787" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="file://$(find happy)/meshes/wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.29804 0.29804 0.29804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="file://$(find happy)/meshes/wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint
+    name="lwheel_to_base"
+    type="fixed">
+    <origin
+      xyz="0 0.241 -0.040"
+      rpy="-4.9304E-32 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lwheel" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link
+    name="rwheel">
+    <inertial>
+      <origin
+        xyz="0 7.9284E-18 -8.91168450782267E-34"
+        rpy="0 0 0" />
+      <mass
+        value="1.2679" />
+      <inertia
+        ixx="0.00842918283944972"
+        ixy="5.63107503334659E-20"
+        ixz="1.47045705506577E-36"
+        iyy="0.00445408378312787"
+        iyz="-9.62964972193618E-35"
+        izz="0.00445408378312787" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="file://$(find happy)/meshes/wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.29804 0.29804 0.29804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 1.5707963267949" />
+      <geometry>
+        <mesh
+          filename="file://$(find happy)/meshes/wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint
+    name="rwheel_to_base"
+    type="fixed">
+    <origin
+      xyz="0 -0.241 -0.040"
+      rpy="-4.9304E-32 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rwheel" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="sonar1">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="sonar1_to_base"
+    type="fixed">
+    <origin
+      xyz="-0.31098 -0.26401 0.0243"
+      rpy="0 0 3.92699075" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonar1" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="sonar2">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="sonar2_to_base"
+    type="fixed">
+    <origin
+      xyz="-0.345 0 0.0243"
+      rpy="0 0 3.1415926" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonar2" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="sonar3">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="sonar3_to_base"
+    type="fixed">
+    <origin
+      xyz="-0.31098 0.26401 0.0243"
+      rpy="0 0 2.35619445" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonar3" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="sonar4">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="sonar4_to_base"
+    type="fixed">
+    <origin
+      xyz="0.31098 0.26401 0.0243"
+      rpy="0 0 0.78539815" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonar4" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="sonar5">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="sonar5_to_base"
+    type="fixed">
+    <origin
+      xyz="0.345 0 0.0243"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonar5" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+	<link name="sonar6">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="sonar6_to_base"
+    type="fixed">
+    <origin
+      xyz="0.345 -0.26401 0.0243"
+      rpy="0 0 5.42247" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonar6" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="AXONcamera_to_base"
+    type="fixed">
+    <origin
+      xyz="0.345 0 0.1943"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="camera_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  
+    <link name="sonarScan">
+    <visual>
+      <geometry>
+        <box size="0.01 0.02 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.0 0 0.0"/>
+      <material name="blue">
+        <color rgba="0 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+  
+  <joint 
+     name="sonarScan_to_base" 
+     type="fixed">
+    <origin
+      xyz="0 0 0.29928"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="sonarScan" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
