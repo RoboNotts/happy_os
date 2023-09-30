@@ -36,7 +36,7 @@ ament_target_dependencies(
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
-target_compile_definitions(${PROJECT_NAME} PRIVATE "ROS2_CONTROL_DEMO_EXAMPLE_2_BUILDING_DLL")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "${PROJECT_NAME}_BUILDING_DLL")
 
 # Export hardware plugins
 pluginlib_export_plugin_description_file(hardware_interface happy.xml)
@@ -47,7 +47,7 @@ install(
   DESTINATION include/${PROJECT_NAME}
 )
 install(
-  DIRECTORY description/launch description/ros2_control description/urdf
+  DIRECTORY description/launch description/ros2_control description/urdf description/meshes description/rviz
   DESTINATION share/${PROJECT_NAME}
 )
 install(
@@ -55,7 +55,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(TARGETS ${PROJECT_NAME}
-  EXPORT export_ros2_control_demo_example_2
+  EXPORT "export_${PROJECT_NAME}"
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -73,6 +73,6 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_export_targets(export_ros2_control_demo_example_2 HAS_LIBRARY_TARGET)
+ament_export_targets("export_${PROJECT_NAME}" HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()
