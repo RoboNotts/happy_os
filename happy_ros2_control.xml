@@ -3,7 +3,7 @@
          type="happy::HappySystemHardware"
          base_class_type="hardware_interface::SystemInterface">
     <description>
-      TODO: WIN!
+      TODO: Write a description of this robot
     </description>
   </class>
 </library>
