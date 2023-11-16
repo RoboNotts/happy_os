@@ -8,3 +8,4 @@ name = "happy_hardware_interface"
 crate-type = ["staticlib"]
 
 [dependencies]
+serialport = "4.2.2"
