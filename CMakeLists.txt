@@ -30,7 +30,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Corrosion)
 
 # Import targets defined in a package or workspace manifest `Cargo.toml` file
-corrosion_import_crate(MANIFEST_PATH hardware/happy_hardware_interface/Cargo.toml)
+corrosion_import_crate(MANIFEST_PATH hardware/motor_interface/Cargo.toml)
 
 ## COMPILE
 
@@ -44,7 +44,7 @@ target_include_directories(happy_ros2_control PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/happy_ros2_control/include>
 $<INSTALL_INTERFACE:include/happy_ros2_control>
 )
-target_link_libraries(happy_ros2_control PRIVATE happy_hardware_interface)
+target_link_libraries(happy_ros2_control PRIVATE motor_interface)
 ament_target_dependencies(
   happy_ros2_control PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}

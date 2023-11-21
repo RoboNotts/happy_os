@@ -2,20 +2,24 @@ const fn generate_crc_table(is_high: bool) -> [u8; 256] {
     let polynomial = if is_high { 0x1021 } else { 0x8408 };
     let mut crc_table = [0u8; 256];
 
-    for i in 0..256 {
+    let mut i = 0;
+    while i < 256 {
         let mut value = i as u16;
         let mut crc = 0;
 
-        for _ in 0..8 {
+        let mut j = 0;
+        while j < 8 {
             if (value ^ crc) & 1 != 0 {
                 crc = (crc >> 1) ^ polynomial;
             } else {
                 crc >>= 1;
             }
             value >>= 1;
+            j += 1;
         }
 
         crc_table[i] = crc as u8;
+        i += 1;
     }
 
     crc_table
@@ -24,7 +28,6 @@ const fn generate_crc_table(is_high: bool) -> [u8; 256] {
 pub fn crc16(data: &[u8]) -> u16 {
     const AUCH_CRCHI: [u8; 256] = generate_crc_table(true);
     const AUCH_CRCLO: [u8; 256] = generate_crc_table(false);
-
 
     let mut uch_crchi = 0xFF;
     let mut uch_crclo = 0xFF;
