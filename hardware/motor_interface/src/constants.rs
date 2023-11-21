@@ -5,8 +5,6 @@ use crate::{crc::crc16, error};
 pub type Error = error::Error;
 pub type ErrorKind = error::ErrorKind;
 
-pub const DEFAULT_DEVICE_ADDRESS: u8 = 0x1;
-
 pub enum MotorStatus {
     None,
     Warning(MotorStatusWarning),
@@ -84,7 +82,7 @@ pub enum ModbusRegister {
     EnableModbus, // 0x0
     // Set to 0 to disable
     // Set to 1 to enable
-    EnabledDriverOutput, // 0x01
+    EnableMotor, // 0x01
     // Target speed from 0~3000 Rotations per Minute
     MotorTargetSpeed, // 0x02
     // The motor generates an acceleration curve using this value from 0~60000 (Rotations per Minute) per Second
@@ -154,7 +152,7 @@ impl ModbusRegister {
     fn get_code(&self) -> u16 {
         match self {
             ModbusRegister::EnableModbus => 0x00,
-            ModbusRegister::EnabledDriverOutput => 0x01,
+            ModbusRegister::EnableMotor => 0x01,
             ModbusRegister::MotorTargetSpeed => 0x02,
             ModbusRegister::MotorAcceleration => 0x03,
             ModbusRegister::MotorInitialSpeed => 0x04,
@@ -185,7 +183,7 @@ impl ModbusRegister {
     fn from_code(code: u16) -> Option<Self> {
         match code {
             0x00 => Some(ModbusRegister::EnableModbus),
-            0x01 => Some(ModbusRegister::EnabledDriverOutput),
+            0x01 => Some(ModbusRegister::EnableMotor),
             0x02 => Some(ModbusRegister::MotorTargetSpeed),
             0x03 => Some(ModbusRegister::MotorAcceleration),
             0x04 => Some(ModbusRegister::MotorInitialSpeed),
@@ -324,15 +322,12 @@ impl ModbusWorkerMessage {
 
 
 // MOTOR CONNECTION CONSTANTS
-// PRIVATE
 pub(crate) const MOTOR_BAUD_RATE: u32 = 19200;
 pub(crate) const MOTOR_CONNECTION_TIMEOUT : Duration = Duration::from_millis(10);
-
-// PUBLIC
-pub(crate) const LEFT_SERVO_NAME : &str = "amy_485_port_left";
-pub(crate) const RIGHT_SERVO_NAME: &str = "amy_485_port_right";
 
 // MOTOR MAGIC CONSTANTS
 // PHYSICAL
 pub(crate) const MOTOR_GEAR : u32 = 16;
 pub(crate) const MOTOR_WHEEL_LENGTH : f32 = 0.5843362;
+pub(crate) const MOTOR_ENCODER_COUNT : u32 = 4000;
+pub(crate) const MOTOR_WHEEL_DIST : f32 = 0.48342;

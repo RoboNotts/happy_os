@@ -1,4 +1,4 @@
-#include "happy/happy_system.hpp"
+#include "happy_ros2_control/happy_system.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -13,16 +13,18 @@ namespace happy
 {
     hardware_interface::CallbackReturn HappySystemHardware::on_init(const hardware_interface::HardwareInfo &info)
     {
-        //
+        // Initialise the super-class
         const hardware_interface::CallbackReturn init_value = hardware_interface::SystemInterface::on_init(info);
         if (init_value != hardware_interface::CallbackReturn::SUCCESS)
         {
             return init_value;
         }
 
+        // Resize the joint info vectors
         hw_positions_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
         hw_velocities_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
         hw_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
+        motor_controllers_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
         for (const hardware_interface::ComponentInfo &joint : info_.joints)
         {
@@ -72,6 +74,10 @@ namespace happy
                 return hardware_interface::CallbackReturn::ERROR;
             }
         }
+        
+        // Initialise the motor controller
+        motor_controller_left_ = motor_controller_new("/dev/");
+        motor_controller_right_ = motor_controller_new("/dev/");
 
         return hardware_interface::CallbackReturn::SUCCESS;
     }
@@ -105,18 +111,10 @@ namespace happy
     hardware_interface::CallbackReturn HappySystemHardware::on_activate(
         const rclcpp_lifecycle::State & /*previous_state*/)
     {
-        // BEGIN: This part here is for exemplary purposes - Please do not copy to your production code
         RCLCPP_INFO(rclcpp::get_logger("HappySystemHardware"), "Activating ...please wait...");
 
-        for (auto i = 0; i < hw_start_sec_; i++)
-        {
-            rclcpp::sleep_for(std::chrono::seconds(1));
-            RCLCPP_INFO(
-                rclcpp::get_logger("HappySystemHardware"), "%.1f seconds left...", hw_start_sec_ - i);
-        }
-        // END: This part here is for exemplary purposes - Please do not copy to your production code
-
         // set some default values
+        hw_positions_[0] = 
         for (auto i = 0u; i < hw_positions_.size(); i++)
         {
             if (std::isnan(hw_positions_[i]))
@@ -126,6 +124,7 @@ namespace happy
                 hw_commands_[i] = 0;
             }
         }
+        
 
         RCLCPP_INFO(rclcpp::get_logger("HappySystemHardware"), "Successfully activated!");
 
@@ -135,17 +134,10 @@ namespace happy
     hardware_interface::CallbackReturn HappySystemHardware::on_deactivate(
         const rclcpp_lifecycle::State & /*previous_state*/)
     {
-        // BEGIN: This part here is for exemplary purposes - Please do not copy to your production code
-        RCLCPP_INFO(rclcpp::get_logger("HappySystemHardware"), "Deactivating ...please wait...");
+        RCLCPP_INFO(rclcpp::get_logger("HappySystemHardware"), "Deactivating...");
 
-        for (auto i = 0; i < hw_stop_sec_; i++)
-        {
-            rclcpp::sleep_for(std::chrono::seconds(1));
-            RCLCPP_INFO(
-                rclcpp::get_logger("HappySystemHardware"), "%.1f seconds left...", hw_stop_sec_ - i);
-        }
-        // END: This part here is for exemplary purposes - Please do not copy to your production code
-
+        // TODO
+        
         RCLCPP_INFO(rclcpp::get_logger("HappySystemHardware"), "Successfully deactivated!");
 
         return hardware_interface::CallbackReturn::SUCCESS;

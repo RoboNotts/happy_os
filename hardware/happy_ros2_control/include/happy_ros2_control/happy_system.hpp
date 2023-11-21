@@ -12,6 +12,8 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/macros.hpp"
 
+#include "motor_interface/motor_interface.h"
+
 namespace happy {
     class HappySystemHardware : public hardware_interface::SystemInterface
     {
@@ -22,6 +24,9 @@ namespace happy {
         std::vector<double> hw_velocities_;
         // Store the wheeled robot position
         double base_x_, base_y_, base_theta_;
+        // Store the controllers
+        std::vector<motor_controller_t> motor_controllers_;
+
     public:
         RCLCPP_SHARED_PTR_DEFINITIONS(HappySystemHardware);
 

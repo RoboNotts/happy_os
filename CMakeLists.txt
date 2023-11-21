@@ -43,6 +43,7 @@ target_compile_features(happy_ros2_control PUBLIC cxx_std_17)
 target_include_directories(happy_ros2_control PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/happy_ros2_control/include>
 $<INSTALL_INTERFACE:include/happy_ros2_control>
+$<INSTALL_INTERFACE:include/motor_interface>
 )
 target_link_libraries(happy_ros2_control PRIVATE motor_interface)
 ament_target_dependencies(
