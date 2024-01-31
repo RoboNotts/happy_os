@@ -5,17 +5,20 @@ use crate::{crc::crc16, error};
 pub type Error = error::Error;
 pub type ErrorKind = error::ErrorKind;
 
+#[derive(Debug)]
 pub enum MotorStatus {
     None,
     Warning(MotorStatusWarning),
     Fatal(MotorStatusFatal),
 }
 
+#[derive(Debug)]
 pub enum MotorStatusWarning {
     HighTemperature,
     FlashWriteFailed,
 }
 
+#[derive(Debug)]
 pub enum MotorStatusFatal {
     Overheat,
     SystemStall,

@@ -1,5 +1,5 @@
 pub(crate) mod error;
-pub(crate) mod motor_controller;
+pub mod motor_controller;
 pub(crate) mod constants;
 pub(crate) mod crc;
 
@@ -121,3 +121,6 @@ pub unsafe extern "C" fn motor_controller_set_position_gain(ptr: *mut MotorContr
     motor_controller.set_position_gain(gain)
         .unwrap()
 }
+
+#[cfg(test)]
+mod tests;
