@@ -1,14 +1,9 @@
-pub(crate) mod error;
 pub mod motor_controller;
-pub(crate) mod constants;
+pub(crate) mod message;
 pub(crate) mod crc;
 
 use motor_controller::*;
 use std::ffi::{CStr, c_char};
-
-// Public types for errors
-pub type Error = error::Error;
-pub type ErrorKind = error::ErrorKind;
 
 // Public FFI Shims
 
