@@ -1,15 +1,11 @@
 use super::*;
 use std::{thread::sleep as zzz, time::Duration};
-use std::io::Write;
 use motor_controller::MotorController;
 
+mod magic_strings;
+
 // const MOTOR_PATH : &str = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0KJXLJ-if00-port0";
-const MOTOR_PATH : &str = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0KJDBY-if00-port0";
-
-#[test]
-fn check_magic_strings() {
-
-}
+// const MOTOR_PATH : &str = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0KJDBY-if00-port0";
 
 #[test]
 fn this_tests_motors() {
@@ -20,12 +16,12 @@ fn this_tests_motors() {
     for (i, p) in available_ports.iter().enumerate() {
         println!("{i}) {}", p.port_name)
     }
-    println!("> ");
+    println!("Enter below:");
     std::io::stdin().read_line(&mut buf).expect("Failed to read line from stdin");
 
     let chosen_one = available_ports.get(buf.trim().parse::<usize>().expect("Invalid input")).expect("Invalid port number").port_name.as_str();
 
-    let mut controller = MotorController::new(chosen_one, 0x0)
+    let mut controller = MotorController::new(chosen_one, 0x1)
         .unwrap_or_else(|e| panic!("Failed to set up Motor Controller! {}", e));
 
     controller.enable_modbus().unwrap_or_else(|e| panic!("Failed to enable modbus mode! {}", e));

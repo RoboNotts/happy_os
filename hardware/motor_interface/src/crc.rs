@@ -1,41 +1,45 @@
-const fn generate_crc_table(is_high: bool) -> [u8; 256] {
-    let polynomial = if is_high { 0x1021 } else { 0x8408 };
-    let mut crc_table = [0u8; 256];
+const fn generate_crc_table() -> [[u8;2]; 256] {
+    const GENERATOR: u16 = 0x1021;
+    let mut crctable16 = [[0u8; 2]; 256];
 
-    let mut i = 0;
-    while i < 256 {
-        let mut value = i as u16;
-        let mut crc = 0;
+    let mut dividend : usize = 0;
+    while dividend < 256 {
+        let mut cur_byte: u16 = (dividend as u16) << 8; /* move dividend byte into MSB of 16Bit CRC */
 
-        let mut j = 0;
-        while j < 8 {
-            if (value ^ crc) & 1 != 0 {
-                crc = (crc >> 1) ^ polynomial;
-            } else {
-                crc >>= 1;
+        let mut bit = 0;
+        while bit < 8
+        {
+            if (cur_byte & 0x8000) != 0
+            {
+                cur_byte <<= 1;
+                cur_byte ^= GENERATOR;
             }
-            value >>= 1;
-            j += 1;
-        }
+            else
+            {
+                cur_byte <<= 1;
+            }
 
-        crc_table[i] = crc as u8;
-        i += 1;
+            bit += 1;
+        }
+        crctable16[dividend] = [(cur_byte << 8) as u8, cur_byte as u8];
+        dividend += 1;
     }
 
-    crc_table
+    crctable16
 }
 
 pub fn crc16(data: &[u8]) -> u16 {
-    const AUCH_CRCHI: [u8; 256] = generate_crc_table(true);
-    const AUCH_CRCLO: [u8; 256] = generate_crc_table(false);
+    const CRC_TABLE: [[u8; 2]; 256] = generate_crc_table();
 
     let mut uch_crchi = 0xFF;
     let mut uch_crclo = 0xFF;
 
     for &byte in data {
         let u_index = uch_crchi ^ byte;
-        uch_crchi = uch_crclo ^ AUCH_CRCHI[u_index as usize];
-        uch_crclo = AUCH_CRCLO[u_index as usize];
+        let [hi, lo] = CRC_TABLE[u_index as usize];
+
+        uch_crchi = uch_crclo ^ hi;
+        uch_crclo = lo;
     }
 
     (u16::from(uch_crchi) << 8) | u16::from(uch_crclo)
