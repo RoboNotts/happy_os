@@ -23,3 +23,18 @@ fn check_motor_enable() {
 
     assert_eq!(MOTOR_ENABLE_MAGIC_FRAME, sut.to_message_bytes())
 }
+
+#[test]
+fn check_motor_disable() {
+    let sut = ModbusRequest {
+        device_address: 0x1,
+        command: ModbusCommand::WriteRegister,
+        register: ModbusRegister::EnableMotor,
+        value: 0x0
+    };
+
+    assert_eq!(MOTOR_DISABLE_MAGIC_FRAME, sut.to_message_bytes())
+}
+
+#[test]
+fn c

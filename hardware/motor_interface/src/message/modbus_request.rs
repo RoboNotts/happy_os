@@ -16,7 +16,7 @@ impl ModbusRequest {
         let register_code: u16 = self.register.into();
         let mut message_bytes: [u8; 8] = [self.device_address, self.command.into(), (register_code >> 8) as u8, register_code as u8, (self.value >> 8) as u8, self.value as u8, 0x0, 0x0];
 
-        let crc = crc16(&message_bytes[2..6]);
+        let crc = crc16(&message_bytes[0..6]);
         message_bytes[6] = (crc >> 8) as u8;
         message_bytes[7] = crc as u8;
 
