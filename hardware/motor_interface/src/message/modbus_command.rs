@@ -8,6 +8,7 @@ use std::fmt::Display;
 pub enum ModbusCommand {
     ReadRegister = 0x3,
     WriteRegister = 0x6,
+    WritePulse = 0x10,
     WriteLocation = 0x78,
     ChangeDeviceAddress = 0x7a,
 }

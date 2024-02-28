@@ -119,6 +119,7 @@ impl ModbusResponse {
             }
             ModbusCommand::WriteLocation => todo!(),
             ModbusCommand::ChangeDeviceAddress => todo!(),
+            ModbusCommand::WritePulse => unimplemented!()
         }
     }
 }
