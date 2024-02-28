@@ -70,7 +70,7 @@ pub enum ModbusRegister {
     // then automatically forward until the encoder Z[?] signals stop.
     // 2. Automatically reverse until EN[?] has a conduction signal and stop.
     // 3. Automatically reverse until the encoder Z[?] signal stops
-    MotorSpecialFunction = 0x19
+    MotorSpecialFunction = 0x19,
 }
 
 #[derive(Debug)]
@@ -114,7 +114,7 @@ impl TryFrom<u16> for ModbusRegister {
             0x17 => Ok(ModbusRegister::MotorAbsolutePositionHigh),
             0x18 => Ok(ModbusRegister::MotorSpeedFilterFrequency),
             0x19 => Ok(ModbusRegister::MotorSpecialFunction),
-            _ => Err(Self::Error {})
+            _ => Err(Self::Error {}),
         }
     }
 }

@@ -9,7 +9,7 @@ pub enum ModbusCommand {
     ReadRegister = 0x3,
     WriteRegister = 0x6,
     WriteLocation = 0x78,
-    ChangeDeviceAddress = 0x7a
+    ChangeDeviceAddress = 0x7a,
 }
 
 #[derive(Debug)]
@@ -32,11 +32,10 @@ impl TryFrom<u8> for ModbusCommand {
             0x6 => Ok(Self::WriteRegister),
             0x78 => Ok(Self::WriteLocation),
             0x7a => Ok(Self::ChangeDeviceAddress),
-            _ => Err(Self::Error {})
+            _ => Err(Self::Error {}),
         }
     }
 }
-
 
 impl From<ModbusCommand> for u8 {
     fn from(value: ModbusCommand) -> Self {

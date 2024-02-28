@@ -1,9 +1,9 @@
-use std::io::Write;
 use crate::message::*;
-use serialport::SerialPort;
-use constants::{MOTOR_BAUD_RATE, MOTOR_CONNECTION_TIMEOUT, MOTOR_GEAR, MOTOR_WHEEL_LENGTH};
 use crate::motor_controller::error::MotorControllerError;
 use crate::motor_controller::motor_status::MotorStatus;
+use constants::{MOTOR_BAUD_RATE, MOTOR_CONNECTION_TIMEOUT, MOTOR_GEAR, MOTOR_WHEEL_LENGTH};
+use serialport::SerialPort;
+use std::io::Write;
 
 mod constants;
 pub mod error;
@@ -11,11 +11,14 @@ pub mod motor_status;
 
 pub struct MotorController {
     device_address: u8,
-    port: Box<dyn SerialPort>
+    port: Box<dyn SerialPort>,
 }
 
 impl MotorController {
-    pub fn new(port_path: &str, device_address: u8) -> Result<MotorController, MotorControllerError> {
+    pub fn new(
+        port_path: &str,
+        device_address: u8,
+    ) -> Result<MotorController, MotorControllerError> {
         // Establish a connection to the motor port
         let port = serialport::new(port_path, MOTOR_BAUD_RATE)
             // Char size 8
@@ -31,14 +34,24 @@ impl MotorController {
             .open()
             .map_err(|e: serialport::Error| MotorControllerError::SerialError(e))?;
 
-        Ok(MotorController { port, device_address })
+        Ok(MotorController {
+            port,
+            device_address,
+        })
     }
 
-    pub fn request(&mut self, message: &ModbusRequest) -> Result<ModbusResponse, MotorControllerError> {
+    pub fn request(
+        &mut self,
+        message: &ModbusRequest,
+    ) -> Result<ModbusResponse, MotorControllerError> {
         let frame = message.to_message_bytes();
 
-        self.port.write_all(&frame).map_err(|e| MotorControllerError::IOError(e))?;
-        self.port.flush().map_err(|e| MotorControllerError::IOError(e))?;
+        self.port
+            .write_all(&frame)
+            .map_err(|e| MotorControllerError::IOError(e))?;
+        self.port
+            .flush()
+            .map_err(|e| MotorControllerError::IOError(e))?;
 
         let v = ModbusResponse::from_reader(&mut self.port)
             .map_err(|e| MotorControllerError::ResponseError(e))?;
@@ -49,20 +62,25 @@ impl MotorController {
             (ModbusCommand::ReadRegister, ModbusResponse::ReadMessage { device_address, .. }) => {
                 if message.device_address != *device_address {
                     Err(MotorControllerError::InvalidResponder)
-                }
-                else {
+                } else {
                     Ok(v)
                 }
-            },
-            (ModbusCommand::WriteRegister, ModbusResponse::WriteMessage { device_address, register, .. }) => {
+            }
+            (
+                ModbusCommand::WriteRegister,
+                ModbusResponse::WriteMessage {
+                    device_address,
+                    register,
+                    ..
+                },
+            ) => {
                 if message.device_address != *device_address || message.register != *register {
                     Err(MotorControllerError::InvalidResponder)
-                }
-                else {
+                } else {
                     Ok(v)
                 }
-            },
-            (_, _) => Err(MotorControllerError::IncorrectResponseType)
+            }
+            (_, _) => Err(MotorControllerError::IncorrectResponseType),
         }
     }
 
@@ -73,7 +91,7 @@ impl MotorController {
             device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::EnableModbus,
-            value: 0x1
+            value: 0x1,
         };
 
         self.request(&modbus_enable_message)?;
@@ -86,11 +104,11 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::EnableMotor,
-            value: 0x1
+            value: 0x1,
         };
 
         self.request(&set_motor_enabled_message)?;
-        
+
         Ok(())
     }
 
@@ -99,11 +117,11 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::EnableMotor,
-            value: 0x0
+            value: 0x0,
         };
 
         self.request(&set_motor_enabled_message)?;
-        
+
         Ok(())
     }
 
@@ -112,7 +130,7 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::ReadRegister,
             register: ModbusRegister::MotorCurrentSpeed,
-            value: 0x1
+            value: 0x1,
         };
 
         let resp: ModbusResponse = self.request(&get_velocity_message)?;
@@ -121,8 +139,7 @@ impl MotorController {
             ModbusResponse::ReadMessage { data, .. } => {
                 if data.len() != 2 {
                     Err(MotorControllerError::IncorrectDataLength(2, data.len()))
-                }
-                else {
+                } else {
                     let rpm: i16 = (((data[0] as u16) << 8) | (data[1] as u16)) as i16;
                     Ok(rpm)
                 }
@@ -144,18 +161,17 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::MotorTargetSpeed,
-            value: speed as u16
+            value: speed as u16,
         };
 
         self.request(&set_velocity_message)?;
-        
+
         Ok(())
     }
 
     pub fn set_velocity(&mut self, speed: f32) -> Result<(), MotorControllerError> {
-
         let rpm: i16 = (speed * 60.0 / MOTOR_WHEEL_LENGTH * MOTOR_GEAR as f32 * 10.0) as i16;
-        
+
         self.set_rpm(rpm)?;
 
         Ok(())
@@ -167,21 +183,20 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::ReadRegister,
             register: ModbusRegister::MotorAbsolutePositionLow,
-            value: 0x1
+            value: 0x1,
         };
 
         let resp_l: ModbusResponse = self.request(&get_position_low)?;
-        
+
         let low = match resp_l {
             ModbusResponse::ReadMessage { data, .. } => {
                 if data.len() != 2 {
                     Err(MotorControllerError::IncorrectDataLength(2, data.len()))
-                }
-                else {
+                } else {
                     let data_low: u16 = ((data[0] as u16) << 8) | (data[1] as u16);
                     Ok(data_low)
                 }
-            },
+            }
             _ => Err(MotorControllerError::IncorrectResponseType),
         }?;
 
@@ -190,17 +205,16 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::ReadRegister,
             register: ModbusRegister::MotorAbsolutePositionHigh,
-            value: 0x1
+            value: 0x1,
         };
 
         let resp_h: ModbusResponse = self.request(&get_position_high)?;
-        
+
         let high = match resp_h {
             ModbusResponse::ReadMessage { data, .. } => {
                 if data.len() != 2 {
                     Err(MotorControllerError::IncorrectDataLength(2, data.len()))
-                }
-                else {
+                } else {
                     let data_high: u16 = ((data[0] as u16) << 8) + (data[1] as u16);
                     Ok(data_high)
                 }
@@ -231,19 +245,19 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::ReadRegister,
             register: ModbusRegister::MotorAbsolutePositionHigh,
-            value: 0x1
+            value: 0x1,
         };
 
         let resp: ModbusResponse = self.request(&get_status)?;
-        
+
         match resp {
             ModbusResponse::ReadMessage { data, .. } => {
                 if data.len() != 2 {
                     Err(MotorControllerError::IncorrectDataLength(2, data.len()))
-                }
-                else {
+                } else {
                     let code_raw: u16 = ((data[0] as u16) << 8) + (data[1] as u16);
-                    let code: MotorStatus = code_raw.try_into()
+                    let code: MotorStatus = code_raw
+                        .try_into()
                         .map_err(|e| MotorControllerError::MotorStatusParseError(e))?;
                     Ok(code)
                 }
@@ -258,11 +272,11 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::MotorPositionLoopProportianalCoefficeient,
-            value: gain as u16
+            value: gain as u16,
         };
 
         self.request(&set_pos_gain_message)?;
-        
+
         Ok(())
     }
 
@@ -272,11 +286,11 @@ impl MotorController {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::MotorSpecialFunction, // This might be wrong?
-            value: ff as u16
+            value: ff as u16,
         };
 
         self.request(&set_pos_ff_message)?;
-        
+
         Ok(())
     }
 }

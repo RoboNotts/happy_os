@@ -18,7 +18,7 @@ pub enum MotorStatusFatal {
     Overheat,
     SystemStall,
     UnderVoltage,
-    LoadTooHeavy
+    LoadTooHeavy,
 }
 
 impl MotorStatus {

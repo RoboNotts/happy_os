@@ -1,14 +1,17 @@
-pub mod motor_controller;
-pub(crate) mod message;
 pub(crate) mod crc;
+pub(crate) mod message;
+pub mod motor_controller;
 
 use motor_controller::*;
-use std::ffi::{CStr, c_char};
+use std::ffi::{c_char, CStr};
 
 // Public FFI Shims
 
 #[no_mangle]
-pub unsafe extern "C" fn motor_controller_new(port_path: *mut c_char, device_address: u8) -> *mut MotorController {
+pub unsafe extern "C" fn motor_controller_new(
+    port_path: *mut c_char,
+    device_address: u8,
+) -> *mut MotorController {
     let port_path_cstr = unsafe {
         assert!(!port_path.is_null());
         CStr::from_ptr(port_path)
@@ -16,8 +19,7 @@ pub unsafe extern "C" fn motor_controller_new(port_path: *mut c_char, device_add
 
     let port_path_rusty = port_path_cstr.to_str().unwrap();
 
-    let mc = MotorController::new(port_path_rusty, device_address)
-        .unwrap();
+    let mc = MotorController::new(port_path_rusty, device_address).unwrap();
 
     Box::into_raw(Box::new(mc))
 }
@@ -37,8 +39,7 @@ pub unsafe extern "C" fn motor_controller_enable_modbus(ptr: *mut MotorControlle
         &mut *ptr
     };
 
-    motor_controller.enable_modbus()
-        .unwrap();
+    motor_controller.enable_modbus().unwrap();
 }
 
 #[no_mangle]
@@ -48,8 +49,7 @@ pub unsafe extern "C" fn motor_controller_set_motor_enabled(ptr: *mut MotorContr
         &mut *ptr
     };
 
-    motor_controller.set_motor_enabled()
-        .unwrap();
+    motor_controller.set_motor_enabled().unwrap();
 }
 
 #[no_mangle]
@@ -59,8 +59,7 @@ pub unsafe extern "C" fn motor_controller_set_motor_disabled(ptr: *mut MotorCont
         &mut *ptr
     };
 
-    motor_controller.set_motor_disabled()
-        .unwrap();
+    motor_controller.set_motor_disabled().unwrap();
 }
 
 #[no_mangle]
@@ -70,8 +69,7 @@ pub unsafe extern "C" fn motor_controller_get_position(ptr: *mut MotorController
         &mut *ptr
     };
 
-    motor_controller.get_position()
-        .unwrap()
+    motor_controller.get_position().unwrap()
 }
 
 #[no_mangle]
@@ -81,29 +79,32 @@ pub unsafe extern "C" fn motor_controller_get_velocity(ptr: *mut MotorController
         &mut *ptr
     };
 
-    motor_controller.get_velocity()
-        .unwrap()
+    motor_controller.get_velocity().unwrap()
 }
 
-pub unsafe extern "C" fn motor_controller_set_velocity(ptr: *mut MotorController, speed: f32) -> () {
+pub unsafe extern "C" fn motor_controller_set_velocity(
+    ptr: *mut MotorController,
+    speed: f32,
+) -> () {
     let motor_controller = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
 
-    motor_controller.set_velocity(speed)
-        .unwrap()
+    motor_controller.set_velocity(speed).unwrap()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn motor_controller_set_position_feedforward(ptr: *mut MotorController, ff : i16) {
+pub unsafe extern "C" fn motor_controller_set_position_feedforward(
+    ptr: *mut MotorController,
+    ff: i16,
+) {
     let motor_controller = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
 
-    motor_controller.set_position_feedforward(ff)
-        .unwrap()
+    motor_controller.set_position_feedforward(ff).unwrap()
 }
 
 #[no_mangle]
@@ -113,8 +114,7 @@ pub unsafe extern "C" fn motor_controller_set_position_gain(ptr: *mut MotorContr
         &mut *ptr
     };
 
-    motor_controller.set_position_gain(gain)
-        .unwrap()
+    motor_controller.set_position_gain(gain).unwrap()
 }
 
 #[cfg(test)]
