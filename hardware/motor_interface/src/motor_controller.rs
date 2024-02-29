@@ -48,13 +48,13 @@ impl MotorController {
 
         self.port
             .write_all(&frame)
-            .map_err(|e| MotorControllerError::IOError(e))?;
+            .map_err(MotorControllerError::IOError)?;
         self.port
             .flush()
-            .map_err(|e| MotorControllerError::IOError(e))?;
+            .map_err(MotorControllerError::IOError)?;
 
         let v = ModbusResponse::from_reader(&mut self.port)
-            .map_err(|e| MotorControllerError::ResponseError(e))?;
+            .map_err(MotorControllerError::ResponseError)?;
 
         match (message.command, &v) {
             (ModbusCommand::WriteLocation, _) => todo!(),
@@ -258,7 +258,7 @@ impl MotorController {
                     let code_raw: u16 = ((data[0] as u16) << 8) + (data[1] as u16);
                     let code: MotorStatus = code_raw
                         .try_into()
-                        .map_err(|e| MotorControllerError::MotorStatusParseError(e))?;
+                        .map_err(MotorControllerError::MotorStatusParseError)?;
                     Ok(code)
                 }
             }
@@ -271,7 +271,7 @@ impl MotorController {
         let set_pos_gain_message = ModbusRequest {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
-            register: ModbusRegister::MotorPositionLoopProportianalCoefficeient,
+            register: ModbusRegister::MotorPositionLoopProportionalCoefficient,
             value: gain as u16,
         };
 

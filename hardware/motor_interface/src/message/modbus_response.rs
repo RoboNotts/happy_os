@@ -56,25 +56,25 @@ impl ModbusResponse {
         let mut message_start: [u8; 2] = [0; 2];
 
         buf.read_exact(&mut message_start)
-            .map_err(|e| ModbusResponseError::IOError(e))?;
+            .map_err(ModbusResponseError::IOError)?;
 
         let device_address = message_start[0];
 
         let command: ModbusCommand = message_start[1]
             .try_into()
-            .map_err(|e| ModbusResponseError::CommandParseError(e))?;
+            .map_err(ModbusResponseError::CommandParseError)?;
 
         match command {
             ModbusCommand::WriteRegister => {
                 let mut message_end: [u8; 6] = [0; 6];
 
                 buf.read_exact(&mut message_end)
-                    .map_err(|e| ModbusResponseError::IOError(e))?;
+                    .map_err(ModbusResponseError::IOError)?;
 
                 let register: ModbusRegister = (((message_end[0] as u16) << 8)
                     + (message_end[1] as u16))
                     .try_into()
-                    .map_err(|e| ModbusResponseError::RegisterParseError(e))?;
+                    .map_err(ModbusResponseError::RegisterParseError)?;
 
                 let mut message_data: [u8; 6] = [0; 6];
                 message_data[..2].copy_from_slice(&message_start);
@@ -96,13 +96,13 @@ impl ModbusResponse {
                 let mut data_len_buf: [u8; 1] = [0; 1];
 
                 buf.read_exact(&mut data_len_buf)
-                    .map_err(|e| ModbusResponseError::IOError(e))?;
+                    .map_err(ModbusResponseError::IOError)?;
 
                 let data_len = data_len_buf[0] as usize;
                 let mut message_end: Vec<u8> = vec![0; data_len + 2];
 
                 buf.read_exact(message_end.as_mut_slice())
-                    .map_err(|e| ModbusResponseError::IOError(e))?;
+                    .map_err(ModbusResponseError::IOError)?;
 
                 if crc16(&message_end[..(message_end.len() - 2)])
                     != (((message_end[message_end.len() - 2] as u16) << 8)

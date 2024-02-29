@@ -19,14 +19,14 @@ pub enum ModbusRegister {
     MotorInitialSpeed = 0x04,
     // Afaik this is a proportional scalar for the motor speed.
     // 0~10000 maps to 0.0~10.000
-    MotorSpeedLoopProportionalCoefficeient = 0x05,
-    // Afaik this is a time scale used to calculate the integral part for the motor speed.
+    MotorSpeedLoopProportionalCoefficient = 0x05,
+    // Afaik this is a timescale used to calculate the integral part for the motor speed.
     // 2~2000ms
     MotorSpeedLoopIntegrationTime = 0x06,
     // Afaik this is a proportional scalar for the position of the motor
     // 60~5000
-    MotorPositionLoopProportianalCoefficeient = 0x07,
-    // Speed FeedForward 0~8.0V/KRPM (i.e Voltage increase per 1k RPM of speed)
+    MotorPositionLoopProportionalCoefficient = 0x07,
+    // Speed FeedForward 0~8.0V/KRPM (i.e. Voltage increase per 1k RPM of speed)
     // Unsure if this is a scaled int, or a f32
     MotorSpeedFeedForwardVoltage = 0x08,
     // Set to 0 to clockwise
@@ -38,8 +38,8 @@ pub enum ModbusRegister {
     MotorElectronicGearLow = 0x0B,
     // Read only target position of the motor
     // 16-bits
-    MotorTargetPostionLow = 0x0C,
-    MotorTargetPostionHigh = 0x0D,
+    MotorTargetPositionLow = 0x0C,
+    MotorTargetPositionHigh = 0x0D,
     // Read-only Alarm code. See MotorStatus
     MotorAlarmCode = 0x0E,
     // Read only motor current 0~32767; Actual Current (A) = x/2000
@@ -54,7 +54,7 @@ pub enum ModbusRegister {
     SystemOutputPWM = 0x13,
     // Parameter saving flag 0~1 for write 0~2 read
     // This allows a programmer to save a preset for the various parameters listed among the registers
-    // 0: Parameters are not saved (or write to unset all parametes)
+    // 0: Parameters are not saved (or write to unset all parameters)
     // 1: Saving parameters (or write to save the current parameters)
     // 2: Saved (i.e. there are saved parameters on this device.)
     ParameterSavingFlag = 0x14,
@@ -93,15 +93,15 @@ impl TryFrom<u16> for ModbusRegister {
             0x02 => Ok(ModbusRegister::MotorTargetSpeed),
             0x03 => Ok(ModbusRegister::MotorAcceleration),
             0x04 => Ok(ModbusRegister::MotorInitialSpeed),
-            0x05 => Ok(ModbusRegister::MotorSpeedLoopProportionalCoefficeient),
+            0x05 => Ok(ModbusRegister::MotorSpeedLoopProportionalCoefficient),
             0x06 => Ok(ModbusRegister::MotorSpeedLoopIntegrationTime),
-            0x07 => Ok(ModbusRegister::MotorPositionLoopProportianalCoefficeient),
+            0x07 => Ok(ModbusRegister::MotorPositionLoopProportionalCoefficient),
             0x08 => Ok(ModbusRegister::MotorSpeedFeedForwardVoltage),
             0x09 => Ok(ModbusRegister::MotorDirectionPolarity),
             0x0A => Ok(ModbusRegister::MotorElectronicGearHigh),
             0x0B => Ok(ModbusRegister::MotorElectronicGearLow),
-            0x0C => Ok(ModbusRegister::MotorTargetPostionLow),
-            0x0D => Ok(ModbusRegister::MotorTargetPostionHigh),
+            0x0C => Ok(ModbusRegister::MotorTargetPositionLow),
+            0x0D => Ok(ModbusRegister::MotorTargetPositionHigh),
             0x0E => Ok(ModbusRegister::MotorAlarmCode),
             0x0F => Ok(ModbusRegister::MotorI),
             0x10 => Ok(ModbusRegister::MotorCurrentSpeed),
