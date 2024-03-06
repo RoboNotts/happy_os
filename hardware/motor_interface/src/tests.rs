@@ -10,7 +10,14 @@ const MOTOR_PATH : &str = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0KJDBY-i
 #[test]
 fn this_tests_motors() {
     let mut controller = MotorController::new(MOTOR_PATH, 0x1)
-        .unwrap_or_else(|e| panic!("Failed to set up Motor Controller! {}", e));
+        .unwrap_or_else(|e| {
+            let ports = serialport::available_ports().expect("No ports found!");
+            for p in ports {
+                println!("{}", p.port_name);
+            }
+
+            panic!("Failed to set up Motor Controller! {}", e);
+        });
 
     controller
         .enable_modbus()
