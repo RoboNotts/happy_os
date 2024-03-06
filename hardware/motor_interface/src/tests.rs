@@ -30,8 +30,8 @@ fn this_tests_motors() {
     println!("Motor Status: {:?}", enabled_status);
 
     controller
-        .set_velocity(0.1)
-        .unwrap_or_else(|e| panic!("Failed to set velocity! {}", e));
+        .set_rpm(6)
+        .unwrap_or_else(|e| panic!("Failed to set rpm! {}", e));
 
     zzz(Duration::from_secs(5));
 

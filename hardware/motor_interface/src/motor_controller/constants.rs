@@ -2,7 +2,7 @@ use std::time::Duration;
 
 // MOTOR CONNECTION CONSTANTS
 pub(crate) const MOTOR_BAUD_RATE: u32 = 115200;
-pub(crate) const MOTOR_CONNECTION_TIMEOUT: Duration = Duration::ZERO;
+pub(crate) const MOTOR_CONNECTION_TIMEOUT: Duration = Duration::from_secs(10);
 
 // MOTOR MAGIC CONSTANTS
 // PHYSICAL
