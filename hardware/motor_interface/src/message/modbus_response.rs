@@ -55,8 +55,10 @@ impl ModbusResponse {
     pub fn from_reader(buf: &mut dyn Read) -> Result<ModbusResponse, ModbusResponseError> {
         let mut message_start: [u8; 2] = [0; 2];
 
+        println!("Hi");
         buf.read_exact(&mut message_start)
             .map_err(ModbusResponseError::IOError)?;
+        println!("Hi");
 
         let device_address = message_start[0];
 

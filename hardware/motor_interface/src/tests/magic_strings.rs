@@ -12,6 +12,7 @@ const MOTOR_SET_POSITION_FF_MAGIC_FRAME: [u8; 6] = [0x01, 0x06, 0x00, 0x19, 0x0,
 
 const MOTOR_DISABLE_MAGIC_FRAME: [u8; 8] = [0x01, 0x06, 0x0, 0x1, 0x0, 0x0, 0xd8, 0x0a];
 const MOTOR_ENABLE_MAGIC_FRAME: [u8; 8] = [0x01, 0x06, 0x0, 0x1, 0x0, 0x01, 0x19, 0xca];
+const MODBUS_ENABLE_MAGIC_FRAME : [u8; 8] = [0x01, 0x06, 0x0, 0x0, 0x0, 0x01, 0x48, 0x0a];
 
 #[test]
 fn check_motor_enable() {
@@ -23,6 +24,18 @@ fn check_motor_enable() {
     };
 
     assert_eq!(MOTOR_ENABLE_MAGIC_FRAME, sut.to_message_bytes())
+}
+
+#[test]
+fn check_modbus_enable() {
+    let sut = ModbusRequest {
+        device_address: 0x1,
+        command: ModbusCommand::WriteRegister,
+        register: ModbusRegister::EnableModbus,
+        value: 0x1,
+    };
+
+    assert_eq!(MODBUS_ENABLE_MAGIC_FRAME, sut.to_message_bytes())
 }
 
 #[test]

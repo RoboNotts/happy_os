@@ -9,7 +9,7 @@ const MOTOR_PATH : &str = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0KJDBY-i
 
 #[test]
 fn this_tests_motors() {
-    let mut controller = MotorController::new(MOTOR_PATH, 0x1)
+    let mut controller = MotorController::new(MOTOR_PATH, 0x01)
         .unwrap_or_else(|e| {
             let ports = serialport::available_ports().expect("No ports found!");
             for p in ports {
@@ -22,6 +22,7 @@ fn this_tests_motors() {
     controller
         .enable_modbus()
         .unwrap_or_else(|e| panic!("Failed to enable modbus mode! {}", e));
+
     let unenabled_status = controller
         .get_status()
         .unwrap_or_else(|e| panic!("Failed to get status! {}", e));
