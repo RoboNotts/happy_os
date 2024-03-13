@@ -61,7 +61,7 @@ impl MotorController {
             (ModbusCommand::ChangeDeviceAddress, _) => todo!(),
             (ModbusCommand::ReadRegister, ModbusResponse::ReadMessage { device_address, .. }) => {
                 if message.device_address != *device_address {
-                    Err(MotorControllerError::InvalidResponder)
+                    Err(MotorControllerError::InvalidResponder(message.device_address, *device_address))
                 } else {
                     Ok(v)
                 }
@@ -74,8 +74,10 @@ impl MotorController {
                     ..
                 },
             ) => {
-                if message.device_address != *device_address || message.register != *register {
-                    Err(MotorControllerError::InvalidResponder)
+                if message.device_address != *device_address {
+                    Err(MotorControllerError::InvalidResponder(self.device_address, message.device_address))
+                } else if message.register != *register {
+                    Err(MotorControllerError::IncorrectResponseRegister(*register, message.register))
                 } else {
                     Ok(v)
                 }
@@ -164,9 +166,26 @@ impl MotorController {
             value: speed as u16,
         };
 
-        self.request(&set_velocity_message)?;
+        println!("set_velocity_message: {:?}", set_velocity_message.to_message_bytes());
 
-        Ok(())
+        let response = self.request(&set_velocity_message)?;
+
+        match response {
+            ModbusResponse::WriteMessage { device_address, register, value, .. } => {
+                if device_address != self.device_address {
+                    Err(MotorControllerError::InvalidResponder(self.device_address, device_address))
+                } else if !matches!(register, ModbusRegister::MotorTargetSpeed) {
+                    Err(MotorControllerError::IncorrectResponseRegister(ModbusRegister::MotorTargetSpeed, register))
+                } else if value != speed as u16 {
+                    Err(MotorControllerError::IncorrectResponseValue(speed as u16, value))
+                } else {
+                    Ok(())
+                }
+            }
+            ModbusResponse::ReadMessage { .. } => {
+                Err(MotorControllerError::IncorrectResponseType)
+            }
+        }
     }
 
     pub fn set_velocity(&mut self, speed: f32) -> Result<(), MotorControllerError> {
@@ -244,7 +263,7 @@ impl MotorController {
         let get_status = ModbusRequest {
             device_address: self.device_address,
             command: ModbusCommand::ReadRegister,
-            register: ModbusRegister::MotorAbsolutePositionHigh,
+            register: ModbusRegister::MotorAlarmCode,
             value: 0x1,
         };
 

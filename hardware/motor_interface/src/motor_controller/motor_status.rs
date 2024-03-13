@@ -1,4 +1,5 @@
-use std::fmt::Display;
+
+use thiserror::Error;
 
 #[derive(Debug)]
 pub enum MotorStatus {
@@ -27,16 +28,9 @@ impl MotorStatus {
     }
 }
 
-#[derive(Debug)]
-pub struct MotorStatusParseError;
-
-impl std::error::Error for MotorStatusParseError {}
-
-impl Display for MotorStatusParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Failed to parse motor status!")
-    }
-}
+#[derive(Debug, Error)]
+#[error("Failed to parse motor status! {0}")]
+pub struct MotorStatusParseError(u16);
 
 impl TryFrom<u16> for MotorStatus {
     type Error = MotorStatusParseError;
@@ -50,7 +44,7 @@ impl TryFrom<u16> for MotorStatus {
             0x10 => Ok(Self::Warning(MotorStatusWarning::HighTemperature)),
             0x20 => Ok(Self::Warning(MotorStatusWarning::FlashWriteFailed)),
             0x0 => Ok(Self::None),
-            _ => Err(Self::Error {}),
+            a => Err(MotorStatusParseError(a)),
         }
     }
 }

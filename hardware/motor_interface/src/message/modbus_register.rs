@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 // These are the registers available over the Modbus
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 #[repr(u16)]
 pub enum ModbusRegister {
     // Set to 0 to disable

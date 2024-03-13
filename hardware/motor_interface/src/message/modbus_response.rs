@@ -1,9 +1,9 @@
 use crate::crc::crc16;
 use crate::message::modbus_command::{ModbusCommand, ModbusCommandParseError};
 use crate::message::modbus_register::{ModbusRegister, ModbusRegisterParseError};
-use std::error::Error;
-use std::fmt::{Display, Formatter};
+use std::fmt::Display;
 use std::io::Read;
+use thiserror::Error;
 
 // Response from the Devices
 // For read commands
@@ -24,41 +24,24 @@ pub enum ModbusResponse {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ModbusResponseError {
-    RegisterParseError(ModbusRegisterParseError),
-    IOError(std::io::Error),
+    #[error("Failed to parse response!")]
+    RegisterParseError(#[from] ModbusRegisterParseError),
+    #[error("I/O issue when sending request!")]
+    IOError(#[from] std::io::Error),
+    #[error("Failed to parse response!")]
     CommandParseError(ModbusCommandParseError),
+    #[error("Failed to validate response checksum!")]
     CheckSumFail,
 }
-
-impl Display for ModbusResponseError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ModbusResponseError::RegisterParseError(e) => {
-                write!(f, "Failed to parse response. Reason: {}", e)
-            }
-            ModbusResponseError::IOError(e) => {
-                write!(f, "I/O issue when sending request. Reason: {}", e)
-            }
-            ModbusResponseError::CommandParseError(e) => {
-                write!(f, "Failed to parse response. Reason: {}", e)
-            }
-            ModbusResponseError::CheckSumFail => write!(f, "Failed to validate response checksum"),
-        }
-    }
-}
-
-impl Error for ModbusResponseError {}
 
 impl ModbusResponse {
     pub fn from_reader(buf: &mut dyn Read) -> Result<ModbusResponse, ModbusResponseError> {
         let mut message_start: [u8; 2] = [0; 2];
 
-        println!("Hi");
         buf.read_exact(&mut message_start)
             .map_err(ModbusResponseError::IOError)?;
-        println!("Hi");
 
         let device_address = message_start[0];
 
@@ -78,19 +61,20 @@ impl ModbusResponse {
                     .try_into()
                     .map_err(ModbusResponseError::RegisterParseError)?;
 
-                let mut message_data: [u8; 6] = [0; 6];
+                let mut message_data: [u8; 8] = [0; 8];
                 message_data[..2].copy_from_slice(&message_start);
                 message_data[2..].copy_from_slice(&message_end);
 
-                if crc16(&message_data) != (((message_end[4] as u16) << 8) + message_end[5] as u16)
+                if crc16(&message_data[0..6]) != (((message_data[6] as u16) << 8) + message_data[7] as u16)
                 {
                     Err(ModbusResponseError::CheckSumFail)
-                } else {
+                } else
+                {
                     Ok(ModbusResponse::WriteMessage {
                         device_address,
                         command,
                         register,
-                        value: ((message_end[2] as u16) << 8) | (message_end[3] as u16),
+                        value: ((message_data[4] as u16) << 8) | (message_data[5] as u16),
                     })
                 }
             }
@@ -101,21 +85,24 @@ impl ModbusResponse {
                     .map_err(ModbusResponseError::IOError)?;
 
                 let data_len = data_len_buf[0] as usize;
-                let mut message_end: Vec<u8> = vec![0; data_len + 2];
+                let mut message_data: Vec<u8> = vec![0; 2 + 1 + data_len + 2];
 
-                buf.read_exact(message_end.as_mut_slice())
+                message_data[0..2].copy_from_slice(&message_start);
+                message_data[2] = data_len_buf[0];
+
+                buf.read_exact(&mut message_data[3..])
                     .map_err(ModbusResponseError::IOError)?;
 
-                if crc16(&message_end[..(message_end.len() - 2)])
-                    != (((message_end[message_end.len() - 2] as u16) << 8)
-                        + message_end[message_end.len() - 1] as u16)
+                if crc16(&message_data[0..(message_data.len() - 2)])
+                    != (((message_data[message_data.len() - 2] as u16) << 8)
+                        + message_data[message_data.len() - 1] as u16)
                 {
                     Err(ModbusResponseError::CheckSumFail)
                 } else {
                     Ok(ModbusResponse::ReadMessage {
                         device_address,
                         command,
-                        data: message_end[..data_len].to_vec(),
+                        data: message_data[3..(3 + data_len)].to_vec(),
                     })
                 }
             }
