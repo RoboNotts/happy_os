@@ -1,7 +1,6 @@
 use crate::crc::crc16;
 use crate::message::modbus_command::{ModbusCommand, ModbusCommandParseError};
 use crate::message::modbus_register::{ModbusRegister, ModbusRegisterParseError};
-use std::fmt::Display;
 use std::io::Read;
 use thiserror::Error;
 
@@ -26,9 +25,9 @@ pub enum ModbusResponse {
 
 #[derive(Debug, Error)]
 pub enum ModbusResponseError {
-    #[error("Failed to parse response!")]
+    #[error("Failed to parse response! {0}")]
     RegisterParseError(#[from] ModbusRegisterParseError),
-    #[error("I/O issue when sending request!")]
+    #[error("I/O issue when sending request! {0}")]
     IOError(#[from] std::io::Error),
     #[error("Failed to parse response!")]
     CommandParseError(ModbusCommandParseError),

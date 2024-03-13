@@ -6,13 +6,13 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum MotorControllerError {
-    #[error("Error initialising serial connection")]
+    #[error("Error initialising serial connection! {0}")]
     SerialError(#[from] SerialError),
     #[error("Could not validate response checksum")]
     CheckSumFail,
-    #[error("Error in modbus response")]
+    #[error("Error in modbus response! {0}")]
     ResponseError(#[from] ModbusResponseError),
-    #[error("Error while reading")]
+    #[error("Error with IO from port! {0}")]
     IOError(#[from] std::io::Error),
     #[error("Invalid client responded to host. Expected {0}, got {1}")]
     InvalidResponder(u8, u8),

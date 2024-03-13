@@ -85,7 +85,7 @@ pub unsafe extern "C" fn motor_controller_get_velocity(ptr: *mut MotorController
 pub unsafe extern "C" fn motor_controller_set_velocity(
     ptr: *mut MotorController,
     speed: f32,
-) {
+) -> f32 {
     let motor_controller = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr

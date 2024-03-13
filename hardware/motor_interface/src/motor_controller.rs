@@ -158,15 +158,13 @@ impl MotorController {
         Ok(speed)
     }
 
-    pub fn set_rpm(&mut self, speed: i16) -> Result<(), MotorControllerError> {
+    pub fn set_rpm(&mut self, speed: i16) -> Result<i16, MotorControllerError> {
         let set_velocity_message = ModbusRequest {
             device_address: self.device_address,
             command: ModbusCommand::WriteRegister,
             register: ModbusRegister::MotorTargetSpeed,
             value: speed as u16,
         };
-
-        println!("set_velocity_message: {:?}", set_velocity_message.to_message_bytes());
 
         let response = self.request(&set_velocity_message)?;
 
@@ -176,10 +174,8 @@ impl MotorController {
                     Err(MotorControllerError::InvalidResponder(self.device_address, device_address))
                 } else if !matches!(register, ModbusRegister::MotorTargetSpeed) {
                     Err(MotorControllerError::IncorrectResponseRegister(ModbusRegister::MotorTargetSpeed, register))
-                } else if value != speed as u16 {
-                    Err(MotorControllerError::IncorrectResponseValue(speed as u16, value))
                 } else {
-                    Ok(())
+                    Ok(value as i16)
                 }
             }
             ModbusResponse::ReadMessage { .. } => {
@@ -188,12 +184,12 @@ impl MotorController {
         }
     }
 
-    pub fn set_velocity(&mut self, speed: f32) -> Result<(), MotorControllerError> {
+    pub fn set_velocity(&mut self, speed: f32) -> Result<f32, MotorControllerError> {
         let rpm: i16 = (speed * 60.0 / MOTOR_WHEEL_LENGTH * MOTOR_GEAR as f32 * 10.0) as i16;
 
-        self.set_rpm(rpm)?;
+        let actual_rpm = self.set_rpm(rpm)?;
 
-        Ok(())
+        Ok(actual_rpm as f32 / 60.0 * MOTOR_WHEEL_LENGTH / MOTOR_GEAR as f32 / 10.0)
     }
 
     pub fn get_position(&mut self) -> Result<i32, MotorControllerError> {

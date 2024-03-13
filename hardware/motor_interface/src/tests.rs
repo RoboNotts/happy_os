@@ -10,7 +10,9 @@ const MOTOR_PATH : &str = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0KJXLJ-i
 #[test]
 fn this_tests_motors() {
     // NB When testing motors, both dip switches must be in the ON position (down).
-    
+    const MOTOR_SPEED: f32 = -0.5;
+    const MOTOR_TIME_SECS: u64 = 5;
+
     let mut controller = MotorController::new(MOTOR_PATH, 0x01)
         .unwrap_or_else(|e| {
             let ports = serialport::available_ports().expect("No ports found!");
@@ -44,9 +46,10 @@ fn this_tests_motors() {
         .unwrap_or_else(|e| panic!("Failed to get velocity! {}", e));
     println!("Still Motor Speed: {:?}", still_speed);
 
-    controller
-        .set_velocity(0.05)
+    let new_velo = controller
+        .set_velocity(MOTOR_SPEED)
         .unwrap_or_else(|e| panic!("Failed to set rpm! {}", e));
+    println!("New velocity {new_velo}");
 
     println!("RUN!");
 
@@ -58,15 +61,16 @@ fn this_tests_motors() {
     println!("Motor Status: {:?}", running_status);
 
     let running_speed = controller
-        .get_rpm()
+        .get_velocity()
         .unwrap_or_else(|e| panic!("Failed to get velocity! {}", e));
-    println!("Motor RPM: {:?}", running_speed);
-    
-    controller
-        .set_velocity(-0.05)
-        .unwrap_or_else(|e| panic!("Failed to set rpm! {}", e));
+    println!("Motor velocity: {} m/s", running_speed);
 
-    zzz(Duration::from_secs(1));
+    let new_velo = controller
+        .set_velocity(-MOTOR_SPEED)
+        .unwrap_or_else(|e| panic!("Failed to set velocity! {}", e));
+    println!("New velocity {new_velo}");
+
+    zzz(Duration::from_secs(MOTOR_TIME_SECS));
 
     println!("STOP!");
 
